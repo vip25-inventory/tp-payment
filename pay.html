@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tharagai Production — Secure Payment</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --card-bg: rgba(17, 24, 39, 0.7);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+      --success: #10b981;
+      --error: #ef4444;
+      --text: #f3f4f6;
+      --text-muted: #9ca3af;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: radial-gradient(circle at top right, #1e1b4b, #090d16), #090d16;
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 24px;
+      box-sizing: border-box;
+    }
+
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--card-border);
+      padding: 40px 32px;
+      border-radius: 24px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+      max-width: 440px;
+      width: 100%;
+      box-sizing: border-box;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .logo-container {
+      margin-bottom: 28px;
+    }
+
+    .logo {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      font-size: 1.4rem;
+      letter-spacing: 0.08em;
+      color: #ffffff;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .logo span {
+      background: linear-gradient(135deg, #a5b4fc, #6366f1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .status-icon {
+      margin: 24px auto;
+      position: relative;
+      width: 80px;
+      height: 80px;
+    }
+
+    .spinner {
+      border: 4px solid rgba(99, 102, 241, 0.1);
+      border-top: 4px solid var(--primary);
+      border-radius: 50%;
+      width: 100%;
+      height: 100%;
+      animation: spin 1.2s cubic-bezier(0.5, 0.1, 0.4, 0.9) infinite;
+      box-sizing: border-box;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .success-ring {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: rgba(16, 185, 129, 0.1);
+      border: 2px dashed var(--success);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--success);
+      font-size: 2.2rem;
+      animation: pulse 2s infinite;
+      box-sizing: border-box;
+    }
+
+    .error-ring {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: rgba(239, 68, 68, 0.1);
+      border: 2px dashed var(--error);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--error);
+      font-size: 2.2rem;
+      box-sizing: border-box;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 0.9; }
+      50% { transform: scale(1.05); opacity: 1; }
+      100% { transform: scale(1); opacity: 0.9; }
+    }
+
+    h2 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin: 0 0 12px 0;
+      letter-spacing: -0.01em;
+    }
+
+    .subtitle {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin: 0 0 24px 0;
+      line-height: 1.5;
+    }
+
+    .amount-display {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 28px;
+    }
+
+    .amount-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+
+    .amount-val {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      font-size: 2.2rem;
+      color: #ffffff;
+      letter-spacing: -0.02em;
+    }
+
+    .btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: linear-gradient(135deg, #6366f1, #4f46e5);
+      color: white;
+      text-decoration: none;
+      padding: 16px 28px;
+      border-radius: 14px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+      cursor: pointer;
+      border: none;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .btn:hover {
+      background: linear-gradient(135deg, #4f46e5, #4338ca);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
+    }
+
+    .btn:active {
+      transform: translateY(1px);
+    }
+
+    .btn-error {
+      background: linear-gradient(135deg, #475569, #334155);
+      box-shadow: none;
+    }
+
+    .btn-error:hover {
+      background: linear-gradient(135deg, #334155, #1e293b);
+      box-shadow: none;
+    }
+
+    .footer-note {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 24px;
+      line-height: 1.4;
+    }
+
+    .step-list {
+      text-align: left;
+      margin: 20px auto;
+      max-width: 280px;
+      font-size: 0.85rem;
+    }
+
+    .step-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      color: var(--text-muted);
+    }
+
+    .step-item.active {
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    .step-item.done {
+      color: var(--success);
+    }
+
+    .step-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--text-muted);
+    }
+
+    .step-item.active .step-dot {
+      background: var(--primary);
+      box-shadow: 0 0 8px var(--primary);
+    }
+
+    .step-item.done .step-dot {
+      background: var(--success);
+    }
+  </style>
+</head>
+<body>
+  <div class="card" id="payment-card">
+    <div class="logo-container">
+      <div class="logo"><span>Tharagai</span> Production</div>
+    </div>
+    
+    <div id="loading-state">
+      <h2>Initializing Payment...</h2>
+      <p class="subtitle">Validating secure transaction token</p>
+      
+      <div class="status-icon">
+        <div class="spinner"></div>
+      </div>
+
+      <div class="step-list">
+        <div class="step-item active" id="step-verify">
+          <span class="step-dot"></span>
+          <span>Verifying transaction security</span>
+        </div>
+        <div class="step-item" id="step-redirect">
+          <span class="step-dot"></span>
+          <span>Opening payment application</span>
+        </div>
+      </div>
+    </div>
+
+    <div id="redirect-state" style="display: none;">
+      <h2>Opening UPI App...</h2>
+      <p class="subtitle">Directing to Google Pay, PhonePe, Paytm, or BHIM</p>
+      
+      <div class="status-icon">
+        <div class="success-ring">✓</div>
+      </div>
+
+      <div class="amount-display">
+        <div class="amount-label">Verified Amount</div>
+        <div class="amount-val" id="display-amount">₹0.00</div>
+      </div>
+
+      <button id="pay-btn" class="btn">
+        <span>Pay with UPI App</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+      </button>
+      
+      <p class="footer-note">If your payment app did not open automatically, click the button above.</p>
+    </div>
+
+    <div id="error-state" style="display: none;">
+      <h2 style="color: var(--error);">Payment Link Invalid</h2>
+      <p class="subtitle">This transaction cannot be completed securely</p>
+      
+      <div class="status-icon">
+        <div class="error-ring">!</div>
+      </div>
+
+      <div class="amount-display" style="border-color: rgba(239, 68, 68, 0.2);">
+        <div class="amount-label" style="color: var(--error);">Error Details</div>
+        <div class="amount-val" style="font-size: 1.1rem; padding-top: 4px; font-weight: 500; font-family: 'Inter', sans-serif;" id="error-message">
+          Invalid/Tampered token signature
+        </div>
+      </div>
+
+      <button onclick="window.close()" class="btn btn-error">Close Page</button>
+      
+      <p class="footer-note">Please request a fresh invoice copy from the generator.</p>
+    </div>
+  </div>
+
+  <script>
+    // ── Payment Configuration ──
+    const MERCHANT_UPI_ID = 'manojh1702-4@okaxis';
+    const MERCHANT_NAME = 'Manoj';
+    const PAYMENT_SECRET_KEY = 'TharagaiProductionSecureKey2026';
+
+    // Simple polynomial rolling hash signature validator (must match Script.js)
+    function generateSignature(amount, secretKey) {
+      let hash = 0;
+      const combined = amount + secretKey;
+      for (let i = 0; i < combined.length; i++) {
+        hash = (hash << 5) - hash + combined.charCodeAt(i);
+        hash |= 0;
+      }
+      return Math.abs(hash).toString(36);
+    }
+
+    // XOR Encrypt/Decrypt
+    function xorEncryptDecrypt(input, key) {
+      let output = '';
+      for (let i = 0; i < input.length; i++) {
+        const charCode = input.charCodeAt(i) ^ key.charCodeAt(i % key.length);
+        output += String.fromCharCode(charCode);
+      }
+      return output;
+    }
+
+    // Base64 helper for URL-safe strings
+    function base64ToBytes(str) {
+      let base64 = str.replace(/-/g, '+').replace(/_/g, '/');
+      while (base64.length % 4) {
+        base64 += '=';
+      }
+      try {
+        return atob(base64);
+      } catch (e) {
+        return '';
+      }
+    }
+
+    // ── Flow execution ──
+    window.addEventListener('DOMContentLoaded', () => {
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get('token');
+
+      const loadingState = document.getElementById('loading-state');
+      const redirectState = document.getElementById('redirect-state');
+      const errorState = document.getElementById('error-state');
+      const errorMessageEl = document.getElementById('error-message');
+      const displayAmountEl = document.getElementById('display-amount');
+      const payBtn = document.getElementById('pay-btn');
+
+      const stepVerify = document.getElementById('step-verify');
+      const stepRedirect = document.getElementById('step-redirect');
+
+      function showError(message) {
+        loadingState.style.display = 'none';
+        redirectState.style.display = 'none';
+        errorState.style.display = 'block';
+        errorMessageEl.textContent = message;
+      }
+
+      if (!token) {
+        showError('No payment token was provided in the link.');
+        return;
+      }
+
+      // Simulate step 1 verification (500ms delay for premium feel)
+      setTimeout(() => {
+        try {
+          const encrypted = base64ToBytes(token);
+          if (!encrypted) {
+            throw new Error('Token structure or encoding is corrupt.');
+          }
+
+          const decrypted = xorEncryptDecrypt(encrypted, PAYMENT_SECRET_KEY);
+          const parts = decrypted.split('|');
+          
+          if (parts.length !== 2) {
+            throw new Error('Invalid token schema.');
+          }
+
+          const amount = parts[0];
+          const signature = parts[1];
+
+          // Validate amount format
+          if (isNaN(amount) || parseFloat(amount) <= 0) {
+            throw new Error('Transaction amount is invalid.');
+          }
+
+          // Verify signature matches key
+          const expectedSignature = generateSignature(amount, PAYMENT_SECRET_KEY);
+          if (signature !== expectedSignature) {
+            throw new Error('Payment link is tampered or uses a mismatching key.');
+          }
+
+          // Verification succeeded!
+          stepVerify.className = 'step-item done';
+          stepRedirect.className = 'step-item active';
+
+          // Format amount for display
+          const formattedAmount = parseFloat(amount).toFixed(2);
+          displayAmountEl.textContent = `₹${formattedAmount}`;
+
+          // Construct final UPI URL
+          const upiUrl = `upi://pay?pa=${encodeURIComponent(MERCHANT_UPI_ID)}&pn=${encodeURIComponent(MERCHANT_NAME)}&am=${formattedAmount}&cu=INR`;
+          payBtn.onclick = () => {
+            window.location.href = upiUrl;
+          };
+
+          // Transition to redirect state (300ms delay)
+          setTimeout(() => {
+            loadingState.style.display = 'none';
+            redirectState.style.display = 'block';
+
+            // Auto-redirect
+            window.location.href = upiUrl;
+            
+            // Fallback auto-redirect after 1.5s
+            setTimeout(() => {
+              window.location.href = upiUrl;
+            }, 1500);
+
+          }, 300);
+
+        } catch (error) {
+          showError(error.message);
+        }
+      }, 500);
+    });
+  </script>
+</body>
+</html>
